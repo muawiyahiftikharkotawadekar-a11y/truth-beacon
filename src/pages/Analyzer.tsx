@@ -12,6 +12,7 @@ import { useAction } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { validateInput } from "@/lib/validate";
 import { saveToHistory } from "@/lib/history";
+import { isConfigurationError, getConfigErrorMessage, getDemoKeyForInputType } from "@/lib/error-classification";
 import {
   Link2,
   FileText,
@@ -201,24 +202,11 @@ export default function Analyzer() {
       saveToHistory(typedResult);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      const isConfigIssue =
-        msg.includes("API key not configured") ||
-        msg.includes("not configured") ||
-        msg.includes("invalid API key") ||
-        msg.includes("403") ||
-        msg.includes("401");
 
-      if (isConfigIssue) {
+      if (isConfigurationError(msg)) {
         // API not configured — offer demo as fallback with a helpful message
-        setError(
-          "API key not configured. Set your GEMINI_API_KEY in .env, or try a demo below."
-        );
-        const demoKey =
-          inputType === "url"
-            ? "true"
-            : inputType === "headline"
-              ? "false"
-              : "misleading";
+        setError(getConfigErrorMessage());
+        const demoKey = getDemoKeyForInputType(inputType);
         const demoResult = DEMO_RESULTS[demoKey];
         setResult(demoResult);
         setIsDemo(true);
