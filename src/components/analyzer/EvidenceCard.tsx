@@ -1,5 +1,6 @@
 import type { EvidenceSource } from "@/lib/types";
 import { ExternalLink, ArrowUpRight, ArrowDownRight, Circle, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const typeConfig = {
   supporting: {
@@ -24,12 +25,23 @@ const typeConfig = {
   },
 };
 
-export function EvidenceCard({ evidence }: { evidence: EvidenceSource }) {
+export function EvidenceCard({
+  evidence,
+  index = 0,
+}: {
+  evidence: EvidenceSource;
+  index?: number;
+}) {
   const config = typeConfig[evidence.type] ?? typeConfig.unknown;
   const Icon = config.icon;
 
   return (
-    <div className="flex gap-3 rounded-md border border-border/30 bg-background/50 p-3">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.3 }}
+      className="flex gap-3 rounded-md border border-border/30 bg-background/50 p-3"
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center gap-1 text-xs font-medium ${config.className}`}>
@@ -65,6 +77,6 @@ export function EvidenceCard({ evidence }: { evidence: EvidenceSource }) {
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
       )}
-    </div>
+    </motion.div>
   );
 }

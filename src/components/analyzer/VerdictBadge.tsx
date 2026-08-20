@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { VerdictType, ClaimVerdict } from "@/lib/types";
 import { Check, X, AlertTriangle, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const verdictConfig: Record<
   string,
@@ -54,7 +55,10 @@ export function VerdictBadge({
   const Icon = config.icon;
 
   return (
-    <span
+    <motion.span
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-medium border border-transparent",
         config.className,
@@ -65,7 +69,7 @@ export function VerdictBadge({
     >
       <Icon className={size === "large" ? "h-4 w-4" : "h-3 w-3"} />
       {config.label}
-    </span>
+    </motion.span>
   );
 }
 
@@ -78,19 +82,40 @@ export function VerdictDisplay({
 }) {
   return (
     <div className="flex flex-col items-center gap-4 py-8">
-      <VerdictBadge verdict={verdict} size="large" />
-      <div className="text-center">
-        <div className="text-3xl font-light tracking-tight tabular-nums">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
+      >
+        <VerdictBadge verdict={verdict} size="large" />
+      </motion.div>
+      <motion.div
+        className="text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <motion.div
+          className="text-3xl font-light tracking-tight tabular-nums"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+        >
           {confidence}%
-        </div>
+        </motion.div>
         <p className="mt-1 text-xs text-muted-foreground">
           Evidence Confidence
         </p>
-      </div>
-      <p className="max-w-md text-center text-xs leading-relaxed text-muted-foreground">
+      </motion.div>
+      <motion.p
+        className="max-w-md text-center text-xs leading-relaxed text-muted-foreground"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.5 }}
+      >
         This score represents the strength and consistency of the available
         evidence. It is not a guarantee of truth.
-      </p>
+      </motion.p>
     </div>
   );
 }
