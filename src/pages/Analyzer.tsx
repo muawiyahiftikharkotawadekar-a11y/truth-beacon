@@ -1,27 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-
-const STORAGE_KEY = "truthbeacon_history";
-
-function saveToHistory(result: AnalysisResultType) {
-  try {
-    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    const entry = {
-      id: crypto.randomUUID(),
-      inputType: result.inputType,
-      inputContent: result.inputContent,
-      title: result.title,
-      verdict: result.verdict,
-      confidence: result.confidence,
-      summary: result.summary,
-      fullResult: result,
-      createdAt: Date.now(),
-    };
-    existing.unshift(entry);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing.slice(0, 50)));
-  } catch {
-    // Silently fail
-  }
-}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +10,8 @@ import Layout from "@/components/Layout";
 import { api } from "@/convex/_generated/api";
 import { useAction } from "convex/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { validateInput } from "@/lib/validate";
+import { saveToHistory } from "@/lib/history";
 import {
   Link2,
   FileText,
@@ -187,34 +166,7 @@ export default function Analyzer() {
   const [error, setError] = useState<string | null>(null);
   const [isDemo, setIsDemo] = useState(false);
 
-  const validateInput = useCallback(
-    (type: InputType, content: string): string | null => {
-      const trimmed = content.trim();
-      if (!trimmed) {
-        if (type === "url") return "Please enter a news article URL.";
-        if (type === "text") return "Please paste article text to analyze.";
-        return "Please enter a headline to analyze.";
-      }
-      if (type === "url") {
-        try {
-          const parsed = new URL(trimmed);
-          if (!["http:", "https:"].includes(parsed.protocol)) {
-            return "Please enter a valid HTTP or HTTPS URL.";
-          }
-        } catch {
-          return "Please enter a valid news article URL.";
-        }
-      }
-      if (type === "text" && trimmed.length < 20) {
-        return "Article text is too short. Please paste more content.";
-      }
-      if (type === "text" && trimmed.length > 15000) {
-        return "Article text is too long. Please limit to 15,000 characters.";
-      }
-      return null;
-    },
-    [],
-  );
+
 
   const getContent = (): string => {
     switch (inputType) {
@@ -261,7 +213,7 @@ export default function Analyzer() {
     } finally {
       setIsAnalyzing(false);
     }
-  }, [analyzeAction, inputType, urlInput, textInput, headlineInput, validateInput]);
+  }, [analyzeAction, inputType, urlInput, textInput, headlineInput]);
 
   const handleTryDemo = (key: string) => {
     setResult(DEMO_RESULTS[key]);
