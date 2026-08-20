@@ -1,4 +1,14 @@
+.env
 .env.local
+.env*.local
 node_modules
 dist
 src/convex/_generated
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

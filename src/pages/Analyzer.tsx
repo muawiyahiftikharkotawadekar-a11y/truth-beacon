@@ -200,16 +200,34 @@ export default function Analyzer() {
       setResult(typedResult);
       saveToHistory(typedResult);
     } catch (err) {
-      console.log("Analysis failed, falling back to demo mode:", err);
-      const demoKey =
-        inputType === "url"
-          ? "true"
-          : inputType === "headline"
-            ? "false"
-            : "misleading";
-      const demoResult = DEMO_RESULTS[demoKey];
-      setResult(demoResult);
-      setIsDemo(true);
+      const msg = err instanceof Error ? err.message : "";
+      const isConfigIssue =
+        msg.includes("API key not configured") ||
+        msg.includes("not configured") ||
+        msg.includes("invalid API key") ||
+        msg.includes("403") ||
+        msg.includes("401");
+
+      if (isConfigIssue) {
+        // API not configured — offer demo as fallback with a helpful message
+        setError(
+          "API key not configured. Set your GEMINI_API_KEY in .env, or try a demo below."
+        );
+        const demoKey =
+          inputType === "url"
+            ? "true"
+            : inputType === "headline"
+              ? "false"
+              : "misleading";
+        const demoResult = DEMO_RESULTS[demoKey];
+        setResult(demoResult);
+        setIsDemo(true);
+      } else {
+        // Other error — show the error message from the backend
+        setError(
+          msg || "Analysis failed. Please check your input and try again."
+        );
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -250,6 +268,23 @@ export default function Analyzer() {
               <ArrowLeft className="h-3.5 w-3.5" />
               New analysis
             </motion.button>
+            {/* Error banner (shown with results, e.g. API key missing + demo fallback) */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ duration: 0.2 }}
+                className="mb-6 overflow-hidden"
+              >
+                <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-xs text-amber-600 dark:text-amber-400">
+                  <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <div>
+                    <p className="font-medium">Configuration Notice</p>
+                    <p className="mt-0.5 text-amber-600/80 dark:text-amber-400/80">{error}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
             <AnalysisResult result={result} isDemo={isDemo} />
           </motion.div>
         ) : (

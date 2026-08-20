@@ -1,117 +1,87 @@
-# TruthBeacon — AI News Verification
+# TruthBeacon — Fake News Detection Web Application
 
-A complete, working web application for detecting and verifying potentially fake or misleading news articles. Built as a college project using React, Convex, and Gemini AI.
+AI-assisted news verification that analyzes claims and evidence to produce clear, transparent verdicts.
 
-## Features
+## Quick Start (Windows)
 
-- **Three Input Modes**: Paste a news URL, article text, or just a headline
-- **AI-Powered Analysis**: Uses Google Gemini to extract claims and verify them against evidence
-- **Evidence Search**: Searches for supporting and contradicting sources via Google Custom Search
-- **Four Verdicts**: TRUE, FALSE, MISLEADING, or UNVERIFIED
-- **Confidence Scores**: Evidence strength scoring with clear explanations
-- **Claim-by-Claim Analysis**: Each claim analyzed individually with its own verdict
-- **Source Transparency**: All evidence sources are clickable and labeled
-- **Demo Mode**: Pre-built sample results for demonstration without API keys
-- **History**: Stores recent analyses in browser localStorage
-- **Dashboard**: Stats, verdict distribution chart, and analysis history
-- **Responsive Design**: Works on mobile, tablet, and desktop
+1. **Install Node.js** LTS from [nodejs.org](https://nodejs.org) (v18 or newer)
+2. **Add your Gemini API key** — get a free one at [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+3. **Double-click `START.bat`**
+
+That's it. The app opens at `http://localhost:5173`.
+
+## Manual Setup
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Copy the example env file and add your keys
+cp .env.example .env
+
+# 3. Edit .env and add your Gemini API key:
+#    GEMINI_API_KEY=your_key_here
+
+# 4. Start the dev server
+npm start
+```
+
+Open `http://localhost:5173` in your browser.
+
+## API Keys
+
+| Key | Required | Where to get it |
+|-----|----------|-----------------|
+| `GEMINI_API_KEY` | Yes | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (free) |
+| `GOOGLE_SEARCH_API_KEY` | No | [console.cloud.google.com](https://console.cloud.google.com) |
+| `GOOGLE_SEARCH_ENGINE_ID` | No | [cse.google.com](https://cse.google.com) |
+
+**Gemini API key** is required for analysis. The optional Google Custom Search keys improve evidence quality but the app works without them.
+
+**Never commit `.env` to Git.** It is listed in `.gitignore`.
+
+## Demo Mode
+
+If no API key is configured, the app falls back to **Demo Mode** automatically:
+
+- Click any **demo button** (True / False / Misleading / Unverified) on the Analyze page
+- Demo results are clearly labeled as sample data
+- Demo Mode uses pre-built examples — no API calls are made
+
+## How It Works
+
+1. Enter a **URL**, paste **article text**, or type a **headline**
+2. The system extracts the article and identifies key claims
+3. Evidence is searched from available sources
+4. Gemini AI compares claims against evidence
+5. You receive a **verdict** (TRUE / FALSE / MISLEADING / UNVERIFIED) with explanation
 
 ## Tech Stack
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui
-- **Backend**: Convex (serverless functions and database)
-- **AI**: Google Gemini 2.0 Flash API
-- **Search**: Google Custom Search JSON API
-- **Auth**: Convex Auth (email OTP + anonymous)
-
-## Setup
-
-### 1. Clone and install
-
-```bash
-bun install
-```
-
-### 2. Configure API Keys
-
-Set the following environment variables in the Freebuff Keys/API keys tab:
-
-| Variable | Description | Required |
-|---|---|---|
-| `GEMINI_API_KEY` | Google Gemini API key | For real analysis |
-| `GOOGLE_SEARCH_API_KEY` | Google Custom Search API key | For evidence search |
-| `GOOGLE_SEARCH_ENGINE_ID` | Google Custom Search Engine ID | For evidence search |
-
-**Getting API Keys:**
-
-- **Gemini API**: Visit [Google AI Studio](https://aistudio.google.com/apikey) — free tier available
-- **Google Custom Search**: Visit [Google Cloud Console](https://console.cloud.google.com) → Enable Custom Search API → Create API key. Then create a Custom Search Engine at [cse.google.com](https://cse.google.com) — free tier: 100 queries/day
-
-### 3. Run Development Server
-
-```bash
-bun run dev
-```
-
-### 4. Demo Mode
-
-If no API keys are configured, the app automatically falls back to demo mode with pre-built sample results. Demo results are clearly labeled.
+- **Frontend:** React 19, Vite, Tailwind CSS, shadcn/ui, Framer Motion
+- **Backend:** Convex (serverless actions)
+- **AI:** Google Gemini 2.0 Flash
+- **Search:** Google Custom Search API (optional)
+- **History:** Browser localStorage
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── Layout.tsx              # Navigation layout
-│   ├── RequireAuth.tsx         # Auth guard
-│   ├── analyzer/
-│   │   ├── AnalysisResult.tsx  # Full results display
-│   │   ├── ClaimCard.tsx       # Individual claim analysis
-│   │   ├── EvidenceCard.tsx    # Evidence source card
-│   │   └── VerdictBadge.tsx    # Verdict display components
-│   └── ui/                     # shadcn/ui components
-├── convex/
-│   ├── schema.ts               # Database schema
-│   ├── analyses.ts             # Analysis history queries/mutations
-│   └── actions/
-│       └── analyze.ts          # AI analysis action (Gemini + Search)
-├── lib/
-│   ├── types.ts                # TypeScript type definitions
-│   ├── demo-data.ts            # Demo mode sample data
-│   └── utils.ts                # Utility functions
-└── pages/
-    ├── Landing.tsx              # Landing page
-    ├── Analyzer.tsx             # Main analyzer page
-    ├── HowItWorks.tsx           # How it works explanation
-    ├── Dashboard.tsx            # Dashboard with stats and history
-    ├── Auth.tsx                 # Authentication page
-    └── NotFound.tsx             # 404 page
+├── src/
+│   ├── pages/           # Landing, Analyzer, Dashboard, HowItWorks
+│   ├── components/      # UI components (analyzer, layout, shadcn)
+│   ├── convex/          # Backend actions, schema, queries
+│   ├── lib/             # Types, validation, history, demo data
+│   └── hooks/           # Auth and UI hooks
+├── START.bat            # Windows quick-start
+├── .env.example         # Environment variable template
+└── README.md            # This file
 ```
-
-## How It Works
-
-1. **Input**: User provides a news URL, pasted text, or headline
-2. **Extraction**: System extracts article content (for URLs)
-3. **Claim Extraction**: AI identifies up to 5 key factual claims
-4. **Evidence Search**: Searches for related sources for each claim
-5. **Verification**: AI compares claims against gathered evidence
-6. **Verdict**: Produces a clear verdict with confidence score and explanation
-
-## Key Design Decisions
-
-- **UNVERIFIED over FALSE**: Breaking news without evidence is labeled UNVERIFIED, not FALSE
-- **No fabricated sources**: The system never invents sources, URLs, or evidence
-- **Demo mode is transparent**: Clearly labeled as sample data, never pretends to be real analysis
-- **localStorage for history**: Simple, no-auth-required history storage
 
 ## Limitations
 
-- AI cannot guarantee absolute truth
-- Breaking news may lack independent verification
-- Some websites block automatic article extraction
-- Free tier search has query limits (100/day)
-- Results depend on available evidence at time of analysis
-
-## License
-
-Educational project — not for production use.
+- AI cannot guarantee absolute truth — results depend on evidence quality
+- Breaking news may not have enough evidence yet (will show UNVERIFIED)
+- Some websites block automatic article extraction (paste text instead)
+- Satire can be difficult to detect
+- Opinion is different from factual reporting

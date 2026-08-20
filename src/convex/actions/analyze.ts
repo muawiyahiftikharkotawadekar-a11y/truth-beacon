@@ -48,7 +48,10 @@ interface AnalysisResult {
 
 async function callGemini(prompt: string): Promise<string> {
   if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
+    throw new Error(
+      "API key not configured. Add your Gemini API key to the environment variables. " +
+      "Get a free key at https://aistudio.google.com/apikey",
+    );
   }
 
   const res = await fetch(
@@ -78,6 +81,7 @@ async function callGemini(prompt: string): Promise<string> {
 
 async function searchGoogle(query: string): Promise<Array<{ title: string; link: string; snippet: string; displayLink: string }>> {
   if (!GOOGLE_SEARCH_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
+    // Search keys not configured — analysis will still work without web search
     return [];
   }
 
@@ -168,10 +172,10 @@ async function extractArticleFromUrl(url: string): Promise<{
       .slice(0, 8000);
 
     return { title, text, publisher, author, date };
-  } catch (error) {
-    throw new Error(
-      `Unable to extract article: ${error instanceof Error ? error.message : "Unknown error"}. Please paste the article text instead.`,
-    );
+  } catch (error) {      throw new Error(
+        `Unable to read this article. ${error instanceof Error ? error.message : "The website may be blocking access."} ` +
+        "Please paste the article text instead.",
+      );
   }
 }
 
@@ -294,7 +298,15 @@ Respond with valid JSON matching this exact structure:
   "limitations": "Any limitations or caveats about this analysis"
 }`;
 
-  const response = await callGemini(prompt);
+  let response: string;
+  try {
+    response = await callGemini(prompt);
+  } catch (err) {
+    throw new Error(
+      `AI analysis failed: ${err instanceof Error ? err.message : "Unknown error"}. ` +
+      "Check that your Gemini API key is valid and has quota remaining."
+    );
+  }
 
   let parsed: AnalysisResponse;
   try {
